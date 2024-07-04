@@ -1,0 +1,1123 @@
+---
+title: "Final_M"
+author: "Abhishek_Bargujar"
+format: 
+  html:
+    self-contained: true
+editor: visual
+---
+
+# Overview
+
+In this piece, I'll look at the characteristics of superheroes and compare and contrast the superheroes from DC and Marvel Comics according to there qualities. I'll try to highlight the parallels and discrepancies across superheroes in every realm.
+
+This data set contains all about heroes from the Marvel and DC universes, including their pros and disadvantages, power levels, durability (how they handle attacks), intelligence, and combat abilities.
+
+Data_Source: -\>
+
+1.  <https://www.kaggle.com/code/adilemrebilgic/marvel-super-heroes/input> (here i choose 3 csv files for heroes dataset and modify it little bit)
+2.  <https://www.kaggle.com/datasets/spatika/marvel-comics-characters-stats-and-powers/data> ( here i get the idea of choosing heros dataset and what to do with it).
+
+In marvel_characters_info i add weight column too.. and little bit edit the dataset. In characters_stats.csv ----\> change to characterStats superheroes_power_matrix.csv --\> change to super power marvel_characters_info ---\> change to heroes information.
+
+## Importing Libraries
+
+(a). Tidyverse: A collection of packages for data manipulation and analysis that follow the principles of tidy data and share a common philosophy,including packages like dplyr,ggplot2, and tidyr
+
+(b).dplyr:In the tidyverse, dplyr is a more simplified and effective package for typical data manipulation operations including summarizing, filtering, and choosing.
+
+(c).plyr: A flexible package for data splitting, function application, and result combining is called plyr.
+
+(d). tidyr:with features for handling missing values, rearranging columns, and converting between wide and long formats, the tidyverse package tidyr in R helps tidy and reshape data, enabing effective data analysis and visualization.
+
+(e).reshape2: Efficient data reshaping is made possibly by the R reshape2 package, which converts data between wide and long formats for better analysis and display.
+
+(f).readr: Provides functions for reading rectangular data (like CSV files) quickly and easily into R.
+
+(e).GridExtra: The gridExtra package in R expands the grid graphics system by enabling the layout and combining of several grid-based charts on a single page.
+
+(f). ggplot2: Data Visualization is made easier with the help of the R ggplot2 library, which uses a declarative vocabulary to produce expressive and adaptable charts.
+
+```{r,include=FALSE}
+
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(reshape2)
+library(dplyr)
+library(gridExtra)
+library(plyr)
+```
+
+## Importing, Inspecting & Preparing The Data sets
+
+(a). The Weight & Height columns appear to include a large number -99 values. that is most I likely the result of missing values because these variables cannot have negative values and all have the same value. To ensure that they have no bearing on the analysis, I am converting them to NA's.
+
+(b). Additionally, the class needs to be changed for the variables found in both datasets. I'll give them everyone an update.
+
+(c).In order to improve performance, I will convert all of the missing values on the two datasets that are indicated by the symbol "-" to NAs.
+
+(d).As a final step, I'll take the heroes dataset's first, needless column.
+
+```{r}
+infoCharacters <- read.csv("heroesInformation.csv", na.strings = c("-", "-99"))
+infoPowers <- read.csv("superHeroPowers.csv")
+infoStats <- read.csv("charactersStats.csv", na.strings = "")
+#infoCharacters
+#infoPowers
+#infoStats
+```
+
+## Checking Height of Heroes
+
+The line chart displays the heights of the first 15 superheroes. Each superhero's name is plotted against their height, providing a visual representation of their heights. The chart allows us to compare the heights of different superheroes at a glance.
+
+AS i can see that from 15 characters most of them height between 165 cm to 195 cm and for assumption i can say that most heroes height fall in between range 165 cm to 195 cm. and this height parameter is also kind of power like some superhero have power to change there height accordingly...
+
+```{r}
+
+infoCharacters <- infoCharacters[complete.cases(infoCharacters$Height) & infoCharacters$Height >= 0, ]
+
+
+ggplot(infoCharacters[1:15,], aes(x = name, y = Height, group = 1)) +
+  geom_line(linewidth = 1.5, linetype = "solid", color = "blue") +
+  geom_point(size = 4, shape = 16, color = "red") +
+  labs(title = 'Height of Superheroes',
+       x = 'Superhero Name',
+       y = 'Height') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 14, face = "bold"))
+```
+
+### Most Common Eye color
+
+-   To visualizing the distribution of categorical data, I have created a count plot for the 'Eye color' column. The plot displays the frequency of each eye color among the characters in the dataset.
+
+-   There are lots of character with 'Blue' color eye , brown followed by green eye color...
+
+```{r}
+infoCharacters <- infoCharacters[!is.na(infoCharacters$`Eye.color`),]
+
+# Creating a count plot
+EyecountPlot <- ggplot(infoCharacters, aes(x = `Eye.color`)) +
+  geom_bar(fill = 'orange', color = 'black') +
+  labs(title = "Count Plot of Eye Color", x = "Eye Color", y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+EyecountPlot
+```
+
+## Finding Heroes Most common weight
+
+The code generates a scatter plot of superhero weights, providing insights into the distribution and variation of weights among superheroes in the dataset, while also taking steps to handle missing values.
+
+Most eroes weight falls under 50 to 210lbs..
+
+```{r}
+
+# Removing missing values
+infoCharacters <- infoCharacters[complete.cases(infoCharacters$Weight) & infoCharacters$Weight >= 0, ]
+
+wgtPlot <- ggplot(infoCharacters, aes(x = seq_along(Weight), y = Weight)) +
+  geom_point(color = 'blue', size = 3) +
+  labs(title = 'Weight of Superheroes',
+       x = 'Superhero Index',
+       y = 'Weight') +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 14, face = "bold"))
+
+wgtPlot
+
+```
+
+## 
+
+## Pie Chart
+
+The pie chart shows the proportions of "Good" and "Bad" alignments among the superheroes. It visually represents the distribution of superhero alignments, allowing us to see the relative proportions of each alignment type. This provides insight into the overall distribution of superhero alignments in the dataset
+
+```{r}
+
+ggplot(infoStats, aes(x = "", fill = Alignment)) +
+  geom_bar(width = 1, color = "white") +
+  coord_polar(theta = "y") +
+  theme_void() +
+  labs(title = 'Alignment Proportions',
+       fill = 'Alignment') +
+  theme(legend.position = "right", legend.title = element_blank())  # Adjusting legend position and removing title
+```
+
+## Checking Durability Frequency
+
+The histogram visualizes the frequency distribution of 'Durability' values in the 'infoStats' dataset, offering insights into the prevalence and concentration of different durability levels. The binwidth of 20 allows for a broader view of the dataset's distribution.
+
+This code visualizing how frequently different Durability values occur in this dataset, providing insights into the distribution of Durability in the 'infoStats' dataset.
+
+Most of the superheroes have durability frequency near the 190 means they have more strong to stop attack and take them in head on..
+
+```{r}
+
+ggplot(infoStats, aes(x = Durability, fill = ..count..)) +
+  geom_histogram(binwidth = 20, color = "white", fill = "#4C72B0") +
+  labs(title = 'Durability Frequency Distribution',
+       x = 'Durability',
+       y = 'Frequency') +
+  theme_minimal() +
+  theme(axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        plot.title = element_text(size = 14, face = "bold"))
+```
+
+## Calculating Speed and Power together
+
+i add speed and power all together to visualize which hero is more powerful in top 38 what is the relation they are showing the relation is showing that when we add speed and power together then the stats of heroes decreasing gradually but also one hero is exceptionally high stats in relation.
+
+```{r}
+
+# Selecting the top 38 heroes based on a criterion 
+top_heroes <- infoStats %>% arrange(desc(Speed + Power)) %>% head(38)
+
+# Create a bar plot
+ggplot(top_heroes, aes(x = reorder(Name, -(Speed + Power)), y = Speed + Power, fill = "Total")) +
+  geom_bar(stat = "identity", position = "dodge", color = "white") +
+  labs(title = 'Top 38 Heroes - Speed + Power',
+       x = 'Hero Name',
+       y = 'Total Value') +
+  scale_fill_manual(values = "blue", guide = FALSE) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        axis.text.y = element_text(size = 8),
+        axis.title = element_text(size = 10, face = "bold"),
+        plot.title = element_text(size = 12, face = "bold"))
+
+
+```
+
+## Subset for Marvel and DC
+
+-   In the infoCharacters data frame, changing the column name from "name" to "Name".
+
+-   Creating a new data frame called marvelDcInfo and fill it with only the infoCharacters rows where "Publisher" is either "Marvel Comics" or "DC Comics"
+
+```{r}
+
+colnames(infoCharacters)[colnames(infoCharacters) == "name"] <- "Name"
+marvelDcInfo <- infoCharacters[(infoCharacters$Publisher == "Marvel Comics" | infoCharacters$Publisher == "DC Comics"), ]
+```
+
+## Removing Name Duplicates And Select Columns
+
+-   I'll only compare two of the data because the most of them are superheroes from Marvel or DC Comics.That's why i selects only rows where the "Publisher" is either "Marvel Comics" or "DC Comics".
+
+-   keep only distinct rows based on the "Name" column & Select Specific columns.
+
+```{r}
+marvelDcInfo <- marvelDcInfo[!duplicated(marvelDcInfo$Name), ]
+marvelDcInfo <- marvelDcInfo %>%
+  select(Name, Gender, Race, Publisher) 
+```
+
+## Joining the Data sets
+
+-   This code joins three data sets(marvelDcInfo, infoStats, and infoPowers) to merge character information from DC and Marvel Comics. A consolidated dataset for analysis or exploration is produced by integrating statistics and powers information based on the names of the characters in the final dataset, fullMarvelDc.
+
+-\> I load dplyr and plyr packages because join operations is not working.
+
+```{r}
+marvelDcStatsInfo <- join(marvelDcInfo, infoStats, by = "Name", type = "inner")
+
+colnames(infoPowers)[colnames(infoPowers) == "hero_names"] <- "Name"
+fullMarvelDc <- join(marvelDcStatsInfo, infoPowers, by = "Name", type = "inner")
+
+```
+
+## Transforming Variable column Into A Single Column Super Power
+
+-   In this code reshapes and filters a data frame(fullMarvelDC) containing Marvel and DC Character information by melting into a long format,renaming columns, and selecting rows where superpowers are true, resulting in a condensed (refers to reducing data set by selecting only specific column),repersentation of characters and their powers.
+
+```{r}
+
+marvelDc <- melt(fullMarvelDc, id = c("Name", "Gender", "Race", "Publisher", "Alignment", "Intelligence", 
+                                         "Strength", "Speed", "Durability", "Power", "Combat", "Total"))
+
+colnames(marvelDc)[colnames(marvelDc) == "variable"] <- "SuperPower"
+
+marvelDc <- marvelDc %>%
+  filter(value == "True") %>%
+  select(-value) 
+```
+
+## Converting Categorical Columns To Factors
+
+-   Here i uses the as.factor() method, which is frequently done in R to represent categorical variables for easier handling in statistical analysis or graphing, to transform several columns in the marvelDc data frame to the factor data type.
+
+```{r}
+
+marvelDc$Name <- as.factor(marvelDc$Name)
+marvelDc$Gender <- as.factor(marvelDc$Gender)
+marvelDc$Race <- as.factor(marvelDc$Race)
+marvelDc$Publisher <- as.factor(marvelDc$Publisher)
+marvelDc$Alignment <- as.factor(marvelDc$Alignment)
+marvelDc$SuperPower <- as.factor(marvelDc$SuperPower)
+
+```
+
+## Data Observations in Each Publisher
+
+-   In the marvelDc data frame, to show the total number of characters for DC and Marvel companies. Characters counts are labeled on each bar and a custom color palette(dcMarvelPalette) is used.The plot provides a concise overview of character distribution between the two publishers.
+-   Marvel has more superheroes characters than DC.
+
+```{r}
+
+dcMarvelPalette <- c("#0476F2", "#EC1E24")
+goodBadPalette <- c("#E58700", "#0EBF7D", "#C99902")
+
+# DATA OBSERVATIONS IN EACH PUBLISHER
+
+ggplot(marvelDc, aes(x = Publisher, fill = Publisher)) + 
+  geom_bar(stat = "count", aes(fill = Publisher)) +
+  labs(x = "Publisher", y = "No. of Characters", title = "DC and Marvel Characters", subtitle = "No. of Characters each publisher") +
+  geom_label(stat = "count", aes(label = ..count..)) +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+
+```
+
+## Males And Females IN DC And Marvel
+
+-   using a grouped bar plot, this code analyzes and displays the gender distribution of characters in the 'marvelDc' dataset for the DC and Marvel companies. A breif comparison of character counts by gender for each publisher is given by the resulting plot.
+-   Marvel and DC universe both have more male characters than female characters.
+-   Marvel has more female characters than DC.
+
+```{r}
+
+marvelDcGender <- marvelDc %>%
+  filter(!is.na(Gender)) %>%
+  group_by(Gender) %>%
+  dplyr::count(Publisher) %>%
+  select(Gender, Publisher, Count = n)
+
+```
+
+```{r}
+ggplot(marvelDcGender, aes(x = Gender, y = Count, fill = Publisher)) +
+  geom_col(position = "dodge", color = "black", size = 0.5) +
+  geom_text(aes(label = paste0(Count, " (", scales::percent(Count/sum(Count)), ")")),
+            position = position_dodge(width = 0.9), vjust = -0.5, size = 3) +
+  labs(x = "Gender", y = "No. of Characters", title = "DC and Marvel Characters", subtitle = "Gender comparison") +
+  facet_wrap(~Publisher) +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.grid.major.y = element_line(color = "gray", linetype = "dashed"),
+        panel.grid.minor.y = element_blank(),
+        legend.position = "bottom") 
+```
+
+## Checking Danger Sense and Accelerated Healing in Heroes
+
+As i using infopower dataset that contain binary values so deal with binary values i am doing sub setting with value.
+
+As I can see that out of 15 super heroes only 2 got Danger Sense Alan Scott, Alex Mercer and 5 got Accelerated Healing power out of 15. and only one hero who get both powers is "Alex Mercer".
+
+```{r}
+
+library(tidyr)
+
+# Subseting the dataset for the specified columns and the first 15 superheroes
+subset_data <- infoPowers[1:15, c("Name", "Accelerated.Healing", "Danger.Sense")]
+
+# Reshaping the data for plotting
+tidy_data <- gather(subset_data, key = "Power", value = "HasPower", -Name)
+
+# Ploting grouped bar plot
+ggplot(tidy_data, aes(x = Name, fill = HasPower)) +
+  geom_bar(stat = "count", position = "dodge") +
+  facet_wrap(~ Power, scales = "free_y") +
+  labs(title = 'Heroes with Accelerated Healing and Danger Sense (First 15)',
+       x = 'Hero Name',
+       y = 'Count') +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+## Race Difference Between Marvel And DC
+
+-   This code analyzes and compares the top 15 races for DC and Marvel Comics, creating separate horizontal bar plots and arranging them side by side for easy comparison.
+
+-   counting character for each race arrange by count.
+
+-   uses grid.arrange() to arrange the DC Comics plot, do similar thing for marvel.
+
+-   The "Race" variable have a lot of NA values for Dc and Marvel , the distribution of NA's are almost directly proportional to the total number of superheroes.
+
+-   Marvel have a lot of mutant superheroes, which is may be the result of x-men characters(Fav : Deadpool)
+
+-   DC universe have more characters from God/Eternal, although marvel has twice as many characters as DC.
+
+-   Marvel has more Human superheroes than DC Universe.(like Ironman,blackwidow..)
+
+-   The Asgard present in Marvel and krypto only present in DC.
+
+```{r}
+
+DCRace <- marvelDc %>%
+  filter(!is.na(Race)) %>%
+  filter(Publisher == "DC Comics") %>%
+  group_by(Race) %>%
+  dplyr::count(Race) %>%
+  select(Race, Count = n) %>%
+  arrange(-Count)
+
+DCRace <- ggplot(DCRace[1:15, ], aes(x = reorder(Race, Count), y = Count)) + 
+  geom_bar(stat = "identity", aes(fill = Race)) +
+  labs(x = "Race", y = "No. of Characters", title = "DC Character Races", subtitle= "Top 15 races") +
+  geom_label(stat = "identity", aes(label = Count)) +
+  coord_flip() +
+  guides(fill = FALSE, alpha = FALSE) +
+  theme_bw()
+
+marvelRace <- marvelDc %>%
+  filter(!is.na(Race)) %>%
+  filter(Publisher == "Marvel Comics") %>%
+  group_by(Race) %>%
+  dplyr::count(Race) %>%
+  select(Race, Count = n) %>%
+  arrange(-Count)
+
+marvelRace <- ggplot(marvelRace[1:15, ], aes(x = reorder(Race, Count), y = Count)) + 
+  geom_bar(stat = "identity", aes(fill = Race)) +
+  geom_label(stat = "identity", aes(label = Count)) +
+  labs(x = "Race", y = "No. of Characters", title = "Marvel Character Races", subtitle= "Top 15 races") +
+  coord_flip() +
+  guides(fill = FALSE, alpha = FALSE) +
+  theme_bw()
+
+grid.arrange(DCRace, marvelRace, ncol = 2)
+```
+
+## Heroes and Villains IN Marvel And DC
+
+Heroes --\> Good, Villains--\> Bad, Neutral --\> those characters who involve in crime and also in helping people.
+
+-   This code creates a grouped bar plot to compare the distribution of character alignments(Heroes, Villains, Neutral) for DC and Marvel Comics, displaying character counts.
+
+-   Marvel Universe have a lot of neutral characters then DC Universe.
+
+-   Marvel has more bad characters per good ones compare to DC.
+
+```{r}
+
+marvelDcAlignment <- marvelDc %>%
+  filter(!is.na(Alignment)) %>%
+  group_by(Alignment) %>%
+  dplyr::count(Publisher) %>%
+  select(Alignment, Publisher, Count = n)
+
+ggplot(marvelDcAlignment, aes(x = Alignment, y = Count)) +
+  geom_bar(stat = "identity", aes(fill = Publisher)) +
+  labs(x = "Alignment", y = "No. of Characters", title = "DC and Marvel Alignment", subtitle= "Heroes, Villains and Neutral comparison") +
+  guides(fill = FALSE) +
+  geom_label(stat = "identity", aes(label = Count)) +
+  facet_wrap(~Publisher) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+```
+
+### Alternative of previous plot that just simply show the exact numbers
+
+```{r}
+
+library(viridis)
+ggplot(marvelDcAlignment, aes(x = Alignment, y = Publisher, fill = Count)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = Count), vjust = 1) +
+  labs(x = "Alignment", y = "Publisher", title = "DC and Marvel Alignment",
+       subtitle = "Heroes, Villains, and Neutral Comparison") +
+  guides(fill = FALSE) +
+  theme_minimal() +
+  scale_fill_viridis() +
+  coord_fixed(ratio = 0.2) 
+```
+
+# Box Plot Comparison Skills Marvel and DC
+
+## - Intelligence
+
+-   Iit make box plot from comparing intelligence levels of heroes. removes the x-axis label for a cleaner look and eliminates the fill legend to reduce clutter.
+
+-   clutter means to an excessive or disorganized collection of things and representation appear crowded, messy, or confusing.
+
+-   guides(fill=false) is used here to control the appearance of legends in the plot, and it is specifically turning off the legend for the fill color here.
+
+-   A boxplot is often created to compare and contrast two or more groups.
+
+    -   The box indicates the range in which the middle 50% of all data lies.
+
+    -   Thus, the lower end of the boxplot is the 1st quartile and the upper end is the 3rd quartile. between q1 and q3, the interquatile range, the solid line indicates the median(middle point of data/50%/q2) and dash line show mean.
+
+    -   boxplot also use to show outliers ,outliers when the data value \< q1 - 1.5(IQR) or data value \> Q3 + 1.5(IQR)
+
+    -   Median:-\>comparing median if one median is higher then other it shows that, on average, characters from that publisher have higher Intelligence scores.
+
+    -   IQR:-\>If one box is taller than the other, it suggests more variability in Intelligence scores for characters from that publisher.
+
+    -   **Outliers:**
+
+        -   Identifying any individual points beyond the whiskers. These are potential outliers and represent characters with extreme Intelligence scores.
+
+        -   Outliers can provide insights into exceptional characters who stand out in terms of intelligence.
+
+    -   **Individual Data Points (`geom_point()`):**
+
+        -   while look at the distribution of individual data points. Are there any specific characters with exceptionally high or low Intelligence scores?
+
+        -   Individual points can help us to identify specific characters that contribute to the observed patterns.
+
+    -   **Distribution of Points:**
+
+        -   By plotting individual points on top of the box plot, you get a sense of how the Intelligence scores are distributed within each category (DC and Marvel).
+
+        -   The points spread along the y-axis represent the actual Intelligence scores of characters, providing a more detailed view than the summary statistics shown by the box plot.
+
+```{r}
+
+### INTELLIGENCE
+boxIntel <- ggplot(marvelDc, aes(x = Publisher, y = Intelligence, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point()+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Intelligence") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+boxIntel
+```
+
+# Alternate
+
+**Shape of Violins:** The width and shape of the violins indicate the density of Intelligence scores. Wider areas suggest higher density.
+
+**Boxplots:** The white-filled boxes inside the violins display the interquartile range (IQR) and median, providing a summary of the central tendency and spread of the data.
+
+**Median Labels:** Text labels on top of the violins indicate the median Intelligence scores for DC and Marvel characters.
+
+```{r}
+
+ggplot(marvelDc, aes(x = Publisher, y = Intelligence, fill = Publisher)) + 
+  geom_violin(trim = FALSE, width = 0.5) +
+  geom_boxplot(width = 0.1, outlier.shape = NA, fill = "white", color = "black") +
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Intelligence") +
+  theme_bw() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  theme(legend.position = "none") +
+  stat_summary(geom = "text", fun = median, aes(label = round(..y.., 2)),
+               position = position_nudge(x = 0.2), size = 3, color = "black")
+
+```
+
+## Strength
+
+A brief box plot contrasts the abilities of DC and Marvel Characters.The x-axis remains discreet, y-axis define "strength",and unique boxes represent each world.In this visual, the strength of heroes from DC and Marvel unfolds.
+
+In strength boxplot there median is almost similar.
+
+In terms of IQR DC superheroes have more variability then marvel characters.
+
+There are more super heroes in DC who beat marvel heroes in terms of strength(outlier comparison)
+
+```{r}
+
+### STRENGTH
+boxStrength <- ggplot(marvelDc, aes(x = Publisher, y = Strength, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point()+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Strength") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+boxStrength
+```
+
+## Speed
+
+-   Characters from DC and Marvel are compared in terms of speed. with discrete publishers and a black-and-white theme accented by a custom palette, and provides a concise snapshot of speed and variations among these legendary characters.
+
+-   In statistics, variability refers to the extent or spread of a set of values in a dataset. It describes how much individual data points differ from the central tendency or mean of the dataset. Variability is a key concept in understanding the distribution of data
+
+-   median is almost similar for both of them, and on IQR basis DC charachter has more variablitiy
+
+-   there are more outliers in marvel that means more heroes with more speed
+
+```{r}
+### SPEED
+boxSpeed <- ggplot(marvelDc, aes(x = Publisher, y = Speed, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point()+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Speed") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+boxSpeed
+```
+
+## Durability
+
+Characters from DC and Marvel are compared in terms of durability. communicates variances in durability among these iconoic characters.
+
+"Durability" represent characteristic or attribute of comic book characters, specifically their ability to endure or withstand physical damage or challenges.
+
+DC has more median than marvel that means DC character has more durability, IQR: DC has more IQR then marvel, more outliers belong to marvels superheroes means some extremely powerful hero belong to marvel.
+
+```{r}
+
+### DURABILITY
+boxDurability <- ggplot(marvelDc, aes(x = Publisher, y = Durability, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point(size=1)+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Durability") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+boxDurability
+```
+
+## Power
+
+Characters from DC and Marvel are compared in terms of power.
+
+Allowing for a swift comparison of power levels between the two universes.
+
+marvel has lower median then DC, dc has more power and DC also beat marvel in terms of IQR too , more outliers near too wick belong too marvel exceptionally powerful heroes.
+
+```{r}
+
+### POWER
+boxPower <- ggplot(marvelDc, aes(x = Publisher, y = Power, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point(alpha = 0.5)+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Power") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+boxPower
+```
+
+## Combat
+
+here i create concise graph for attributes like intellect, strength, speed, Durability,power,and combat,comparing DC and Marvel Characters.
+
+and showing every box plot here...
+
+In term of median marvel beat DC in combat and IQR belong to DC , in outliers marvel again beat the DC.
+
+```{r}
+
+### COMBAT
+boxCombat <- ggplot(marvelDc, aes(x = Publisher, y = Combat, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point()+
+  labs(x = "", title = "DC and Marvel Characters", subtitle = "Comparison of Combat") +
+  guides(fill = FALSE) +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+
+grid.arrange(boxIntel, boxStrength, boxSpeed, boxDurability, boxPower, boxCombat,  ncol = 2)
+boxCombat
+```
+
+## TOP CHARACTERS HIGHEST INTELLIGENCE MARVEL AND DC
+
+-   DC have Highest Intelligence Superheroes character than Marvel
+
+-   In DC Universe have Mister Mxyzptlk, and Super Man have most intelligence
+
+-   In Marvel universe have Watcher, and Vision have most intelligence.
+
+```{r}
+marvelDcIntel <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Intelligence) %>%
+  select(Name, Intelligence) %>%
+  arrange(-Intelligence)
+
+# Top 30 characters
+top30 <- marvelDcIntel[1:30, ]
+
+ggplot(top30, aes(x = reorder(Name, Intelligence), y = Intelligence, fill = Publisher)) + 
+  geom_col(width = 0.7) +
+  ylim(0, 120) +
+  labs(x = "Character", y = "Intelligence", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Intelligence") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+```
+
+### Alternate
+
+-   Converts the 'Name' column to a factor with levels in the order of unique names. This is done for proper ordering in the plots.
+
+-   **`ggpairs()`**: Generates a scatterplot matrix.
+
+-   **`aes(color = Publisher, size = Intelligence)`**: Defines aesthetics for the plots, using 'Publisher' for color and 'Intelligence' for size.
+
+-   **`columns = c("Intelligence")`**: Specifies the columns to include in the matrix.
+
+-   **`upper`**, **`lower`**, **`diag`**: Defines the type of plots for the upper diagonal, lower diagonal, and diagonal elements, respectively.
+
+```{r}
+library(GGally)
+#  The GGally package is an extension of the popular ggplot2 package and provides additional functions for creating a variety of plots, including scatterplot matrices, parallel coordinate plots, and more.
+
+
+top30 <- marvelDcIntel[1:30, ]
+
+# Converting Name to a factor for proper ordering
+top30$Name <- factor(top30$Name, levels = unique(top30$Name))
+
+# Creating a scatterplot matrix
+scatterplot_matrix <- ggpairs(
+  top30,
+  aes(color = Publisher, size = Intelligence),
+  columns = c("Intelligence"),  
+  title = "Scatterplot Matrix for Top 30 Marvel and DC Characters",
+  upper = list(continuous = "points", mapping = aes(color = Publisher)),
+  lower = list(continuous = "points", mapping = aes(color = Publisher)),
+  diag = list(continuous = "barDiag", mapping = aes(fill = Publisher))
+)
+
+scatterplot_matrix
+
+# red color showing marvel and blue color showing DC
+```
+
+## TOP CHARACTERS HIGHEST STRENGTH MARVEL AND DC
+
+-   when i compare both universe in terms of Strength from character 1 to 30 , they both have similar strength in most of characters , but in some options marvel beat the DC character in terms of strength.
+
+-   The Highest Strength character in marvel is "Thor" and "Thanos" from 1 to 30 heroes
+
+-   The Highest Strength character in DC is "Super Man" and "Wonder Woman"
+
+```{r}
+marvelDcStrength <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Strength) %>%
+  select(Name, Strength) %>%
+  arrange(-Strength)
+
+# Top 30 characters
+top30 <- marvelDcStrength[20:50, ]
+
+ggplot(top30, aes(x = reorder(Name, Strength), y = Strength, fill = Publisher)) + 
+  geom_col(width = 0.7, color = "black") +
+  labs(x = "Character", y = "Strength", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Strength") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+```
+
+### Alternate
+
+ The plot displays the characters' strength frequencies and distinguishes between Marvel and DC characters using different colors.
+
+```{r}
+top30 <- marvelDcStrength[30:60, ]
+
+ggplot(top30, aes(x = Strength, fill = Publisher)) + 
+  geom_histogram(binwidth = 5, color = "black", alpha = 0.7, position = "identity") +
+  labs(x = "Strength", y = "Frequency", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Strength") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  theme(axis.text = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+```
+
+# TOP CHARACTERS HIGHEST SPEED MARVEL AND DC
+
+-   DC universe beat Marvel in terms of speed.
+
+-   Dc has the fastest character as superman, flash, and zoom.... zoom is the evil form of flash; flash becomes zoom when it travels too much over many timelines in the past & future and taht transforms everything.
+
+-   Marvel has the fastest character as Quick Silver, Star Dust, Nova.
+
+    -   Nova come from different time line/ different Universe in Marvel after Thanos Incident, when the multiVerse concept introduce by Dr. Strange, after that Nova introduce to Marvel Fans, not in just comics, cartoons but also in movies..
+
+```{r}
+
+# TOP CHARACTERS HIGHEST SPEED MARVEL AND DC
+
+marvelDcSpeed <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Speed) %>%
+  select(Name, Speed) %>%
+  arrange(-Speed)
+
+ggplot(marvelDcSpeed[1:30, ], aes(x = reorder(Name, Speed), y = Speed)) + 
+  geom_bar(stat = "identity", aes(fill = Publisher)) +
+  labs(x = "Character", y = "Speed", title = "Top 30 Marvel and DC Characters", subtitle = "With Highest Speed") +
+  coord_flip() +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+```
+
+### Alternate
+
+```{r}
+marvelDcSpeed <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Speed) %>%
+  select(Name, Speed) %>%
+  arrange(-Speed)
+
+# Create a density plot
+ggplot(marvelDcSpeed[1:30, ], aes(x = Speed, fill = Publisher)) +
+  geom_density(alpha = 0.7) +
+  labs(x = "Speed", y = "Density",
+       title = "Top 30 Marvel and DC Characters",
+       subtitle = "With Highest Speed") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  theme(axis.text = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+
+```
+
+## TOP CHARACTERS HIGHEST DURABILITY MARVEL AND DC
+
+-   In terms of Durability marvel has most durable characters then DC characters.
+
+-   but most Durable character is Dooms Day from DC universe
+
+-   In marvel universe StarDust, Nova, Silver Surfer has most Durability
+
+-   nova is alien so it's power of recovery is more than others , it can heal himself.
+
+-   Dooms Day is very underrated character of DC we can't see it yet on TV but we find it in comic books of DC
+
+```{r}
+# TOP CHARACTERS HIGHEST DURABILITY MARVEL AND DC
+
+marvelDcDur <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Durability) %>%
+  select(Name, Durability) %>%
+  arrange(-Durability)
+
+ggplot(marvelDcDur[1:30, ], aes(x = reorder(Name, Durability), y = Durability)) + 
+  geom_bar(stat = "identity", aes(fill = Publisher)) +
+  ylim(0, 120) +
+  labs(x = "Character", y = "Durability", title = "Top 30 Marvel and DC Characters", subtitle = "With Highest Durability") +
+  coord_flip() +
+  theme_bw() +
+  scale_fill_manual(values=dcMarvelPalette)
+```
+
+### Alternate
+
+Marvel beat DC in terms of Durability at one point DC and Marvel has equal durability after Warlock super hero marvel beating the DC in terms of Durability.
+
+```{r}
+marvelDcDur <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Durability) %>%
+  select(Name, Durability) %>%
+  arrange(-Durability)
+
+# Create a line chart
+ggplot(marvelDcDur[45:75, ], aes(x = reorder(Name, Durability), y = Durability, group = Publisher, color = Publisher)) +
+  geom_line() +
+  labs(x = "Character", y = "Durability", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Durability") +
+  theme_minimal() +
+  scale_color_manual(values = dcMarvelPalette) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+
+```
+
+# TOP CHARACTERS HIGHEST POWER MARVEL AND DC
+
+-   In top 30 heroes there power are look kind of similar but number of Marvel super heroes have high frequency in terms of ranking that's why marvel beat dc.
+
+```{=html}
+<!-- -->
+```
+-   marvel universe has more powerful super heroes than DC universe.
+
+-   marvel has Ultron, Thor and Thanos
+
+    -   Ultron is creation of iron man and it consume his AI assistant and consume all the information to become a destroyer and then transform in villian and try to take down the whole city in america and then defeated by vision who made of one powerful stone.
+
+    -   Thor is God of Lighting and two hammers one is destroyed by her sister during fight for throne and asguard.
+
+    -   Thanos is most powerful villian of marvel it destroys almost 75% population of world with the help of 5 gems/stones.
+
+-   Dc has Amazo and Dead Man.
+
+```{r}
+marvelDcPow <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Power) %>%
+  select(Name, Power) %>%
+  arrange(-Power)
+
+# Top 30 characters
+top30 <- marvelDcPow[1:30, ]
+
+ggplot(top30, aes(x = reorder(Name, Power), y = Power, color = Publisher, fill = Publisher)) + 
+  geom_segment(aes(xend = reorder(Name, Power), yend = 0), size = 2) +
+  geom_point(size = 4, shape = 21, position = position_dodge(width = 0.7)) +
+  labs(x = "Character", y = "Power", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Power") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  scale_color_manual(values = dcMarvelPalette) +
+  coord_flip() +
+  theme(axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        panel.border = element_blank(),
+        axis.line = element_line(color = "black"))
+
+```
+
+### Alternate
+
+When i compare super heroes from 30 to 60 DC has Zatanna and Super boy-prime has with Highest Power. and on the other hand Watcher, Thor Girl,War Machine has same levels of power like highest power.
+
+Marvel has more powerful super heroes compare to DC.
+
+```{r}
+marvelDcPow <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Power) %>%
+  select(Name, Power) %>%
+  arrange(-Power)
+
+# Top 30 characters
+top30 <- marvelDcPow[30:60, ]
+
+ggplot(top30, aes(x = reorder(Name, Power), y = Power, color = Publisher, shape = Publisher)) + 
+  geom_point(size = 4, alpha = 0.8) +
+  labs(x = "Character", y = "Power", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Power") +
+  theme_minimal() +
+  scale_color_manual(values = dcMarvelPalette) +
+  scale_shape_manual(values = c(16, 17)) +  # Specify point shapes
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"))
+
+```
+
+# TOP CHARACTERS HIGHEST COMBAT SKILLS MARVEL AND DC
+
+-   while comparing Top 30 DC and Marvel Universes superheroes in terms of their combat skill or in other words fighting skills, Marvel beat the beat in Combat skill
+
+    -   In Marvel "Ares" is most powerful hero from different earth/ different universe in terms of combat with skills like Superhuman strength, speed, stamina, durability, agility, and reflexes superior to that of most Olympians Immunity to all diseases and infections Regenerative healing factor Magic manipulation Virtual immortality War manipulation Expert armed combatant.
+
+    -   In Dc "Wonder Woman" is most powerful super hero from Amazon in terms of combat skill, with Superhuman strength, speed, light, senses, and reflexes, Divine lightning manipulation, Energy Absorption and projection (via channeling through her bracelets), Magic., Regenerative healing factor, Immortality.
+
+```{r}
+marvelDcCombat <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  distinct(Combat) %>%
+  select(Name, Combat) %>%
+  arrange(-Combat)
+```
+
+```{r}
+ggplot(marvelDcCombat[1:30, ], aes(x = reorder(Name, Combat), y = Combat, fill = Publisher)) + 
+  geom_bar(stat = "identity", width = 0.7, color = "black", alpha = 0.8) +
+  labs(x = "Character", y = "Combat", 
+       title = "Top 30 Marvel and DC Characters", 
+       subtitle = "With Highest Combat Skills") +
+  theme_minimal() +
+  scale_fill_manual(values = dcMarvelPalette) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9),  # Adjust x-axis label size
+        axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"),
+        legend.position = "bottom",  # Move legend to the bottom for better clarity
+        legend.title = element_blank(),  # Remove legend title for cleaner appearance
+        panel.grid.major.y = element_line(color = "gray", linetype = "dashed"))  # Add dashed grid lines for reference
+```
+
+# BOXPLOT OVERALL COMPARISION MARVEL AND DC
+
+-   Comparing the Total abilities of Marvel and DC characters. the boxes show the distribution of abilities for each publisher.
+-   median is almost same for both universes, in terms of IQR DC beat Marvel , there are more outliers belong to marvel universe.
+
+```{r}
+
+# BOXPLOT OVERALL COMPARISION MARVEL AND DC
+
+ggplot(marvelDc, aes(x = Publisher, y = Total, fill = Publisher)) + 
+  geom_boxplot() +
+  geom_point()+
+  labs(x = "Publisher", title = "DC and Marvel Characters", subtitle =  "Most Powerful Characters Comparison (Sum of abilities)") +
+  theme_bw() + 
+  scale_fill_manual(values=dcMarvelPalette)
+
+```
+
+## TOP POWERFUL CHARACTERS MARVEL AND DC
+
+1.  Most Powerful hero come from Marvel Universe.
+
+2.  Most Powerful Villains come from DC Universe.
+
+```{r}
+
+# TOP POWERFUL CHARACTERS MARVEL AND DC
+
+dcTotal <- marvelDc %>%
+  filter(Publisher == "DC Comics") %>%
+  group_by(Name, Alignment) %>%
+  distinct(Total) %>%
+  select(Name, Total) %>%
+  arrange(-Total)
+
+dcTotal <- ggplot(dcTotal[1:20, ], aes(x = reorder(Name, Total), y = Total)) + 
+  geom_bar(stat = "identity", aes(fill = Alignment)) +
+  labs(x = "Character", y = "Total", title = "Top 20 DC Characters", subtitle = "Most Powerful Heroes or Villains") +
+  coord_flip() +
+  theme_bw() + 
+  scale_fill_manual(values=goodBadPalette, labels = c("villain", "hero", "neutral"))
+
+marvelTotal <- marvelDc %>%
+  filter(Publisher == "Marvel Comics") %>%
+  group_by(Name, Alignment) %>%
+  distinct(Total) %>%
+  select(Name, Total) %>%
+  arrange(-Total)
+
+marvelTotal <- ggplot(marvelTotal[1:20, ], aes(x = reorder(Name, Total), y = Total)) + 
+  geom_bar(stat = "identity", aes(fill = Alignment)) +
+  labs(x = "Character", y = "Total", title = "Top 20 Marvel Characters", subtitle = "Most Powerful Heroes or Villains") +
+  coord_flip() +
+  theme_bw() +
+  scale_fill_manual(values=goodBadPalette, labels = c("villain", "hero", "neutral"))
+
+grid.arrange(dcTotal, marvelTotal, ncol = 2)
+```
+
+## TOP SUPERPOWERS MARVEL AND DC
+
+-   More Super Strength, Stamina, super hero come from marvel universe.
+
+-   marvel universe beat DC universe in terms of super powers.
+
+-   Psionic powers,Natural weapons, Teleportation,Telekinesis only belong to marvel universe.
+
+-   size changing, weapon master, and energy constructs only belong to DC universe.
+
+```{r}
+# TOP SUPERPOWERS MARVEL AND DC
+
+dcSuperP <- marvelDc %>%
+  filter(Publisher == "DC Comics") %>%
+  group_by(SuperPower) %>%
+  dplyr::count(SuperPower) %>%
+  select(SuperPower, Count = n) %>%
+  arrange(-Count)
+
+dcSuperP <- ggplot(dcSuperP[1:20, ], aes(x = reorder(SuperPower, Count), y = Count)) + 
+  geom_bar(stat = "identity") +
+  geom_label(stat = "identity", aes(label = Count)) +
+  labs(x = "Superpower", y = "No. of Characters", title = "DC Comics", subtitle = "Top 20 Superpowers") +
+  guides(fill = FALSE) +
+  coord_flip() +
+  theme_bw()
+
+marvelSuperP <- marvelDc %>%
+  filter(Publisher == "Marvel Comics") %>%
+  group_by(SuperPower) %>%
+  dplyr::count(SuperPower) %>%
+  select(SuperPower, Count = n) %>%
+  arrange(-Count)
+
+marvelSuperP <- ggplot(marvelSuperP[1:20, ], aes(x = reorder(SuperPower, Count), y = Count)) + 
+  geom_bar(stat = "identity") +
+  geom_label(stat = "identity", aes(label = Count)) +
+  labs(x = "Superpower", y = "No. of Characters", title = "Marvel Comics", subtitle = "Top 20 Superpowers") +
+  guides(fill = FALSE) +
+  coord_flip() +
+  theme_bw()
+
+grid.arrange(dcSuperP, marvelSuperP, ncol = 2)
+```
+
+## TOP CHARACTERS HIGHEST No. OF SUPERPOWERS
+
+-   DC universe has most number of superpowers more than marvel.
+
+    -   Amazon(Amazo) and (spectre)Kryptonions have most powerful characters from DC
+
+    -   Nova and captain marvel are from marvel universe with highest number of super powers.
+
+    -   there is conflict between marvel and DC there are captain marvel in both universe but then marvel claim that they already registered captain marvel as there official super hero of multi verse then DC change there captain marvel name to sazam.
+
+```{r}
+marvelDcSuperP <- marvelDc %>%
+  group_by(Name, Publisher) %>%
+  dplyr::count(Name) %>%
+  select(Name, Count = n) %>%
+  arrange(-Count)
+
+```
+
+```{r}
+ggplot(marvelDcSuperP[1:25, ], aes(x = reorder(Name, Count), y = Count, color = Publisher)) +
+  geom_segment(aes(xend = reorder(Name, Count), yend = 0), size = 1, linetype = "solid") +
+  geom_point(size = 4, alpha = 0.8) +
+  labs(x = "Character", y = "No. of Superpowers", 
+       title = "Top 25 Marvel and DC Characters", 
+       subtitle = "With Highest No. of Superpowers") +
+  theme_minimal() +
+  scale_color_manual(values = dcMarvelPalette) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 9),  # Adjust x-axis label size and orientation
+        axis.text.y = element_text(size = 10, face = "bold"),
+        axis.title = element_text(size = 12, face = "bold"),
+        plot.title = element_text(size = 16, face = "bold"),
+        plot.subtitle = element_text(size = 14, face = "italic"),
+        panel.grid.major.y = element_line(color = "gray", linetype = "dashed"))  # Add dashed grid lines for reference
+```
